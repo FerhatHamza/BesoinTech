@@ -29,15 +29,26 @@
         const API_URL = "https://besointech.ferhathamza17.workers.dev"; 
     </script>
 
-    <div id="login-page" class="flex-grow flex items-center justify-center px-4 bg-gradient-to-br from-slate-100 to-blue-50">
+    <div id="login-page" class="min-h-screen w-full flex items-center justify-center px-4 bg-gradient-to-br from-slate-100 to-blue-50">
         <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md border-t-8 border-brand">
             <h1 class="text-3xl font-bold text-center text-slate-800 mb-2">Epipharm Vigilance</h1>
             <p class="text-center text-gray-500 mb-8">Authentification</p>
+            
             <form id="login-form" class="space-y-5">
-                <input type="text" id="username" placeholder="Nom d'utilisateur" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-brand outline-none" required>
-                <input type="password" id="password" placeholder="Mot de passe" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-brand outline-none" required>
-                <button type="submit" class="w-full bg-brand hover:bg-cyan-700 text-white font-bold py-3 rounded-lg shadow-lg transition">Connexion</button>
-                <p id="login-error" class="text-red-500 text-center text-sm hidden font-bold mt-2">Erreur d'identifiants</p>
+                <input type="text" id="username" placeholder="Nom d'utilisateur" 
+                       class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-brand outline-none" required>
+                
+                <input type="password" id="password" placeholder="Mot de passe" 
+                       class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-brand outline-none" required>
+                
+                <button type="submit" 
+                        class="w-full bg-brand hover:bg-cyan-700 text-white font-bold py-3 rounded-lg shadow-lg transition">
+                    Connexion
+                </button>
+                
+                <p id="login-error" class="text-red-500 text-center text-sm hidden font-bold mt-2">
+                    Erreur d'identifiants
+                </p>
             </form>
         </div>
     </div>
@@ -277,9 +288,22 @@
         }
         function logout() { localStorage.removeItem('user'); location.reload(); }
         function showPage(id) {
-            document.querySelectorAll('.hidden-page, #login-page').forEach(el => el.style.display = 'none');
+            // Hide all pages
+            document.querySelectorAll('.hidden-page, #login-page').forEach(el => {
+                el.style.display = 'none';
+                el.style.opacity = '0';
+            });
+        
             const p = document.getElementById(id);
-            p.style.display = (id === 'app-page') ? 'flex' : 'block';
+            
+            // If it's the login page or app page, use flex to keep things centered/structured
+            if (id === 'login-page' || id === 'app-page') {
+                p.style.display = 'flex';
+            } else {
+                p.style.display = 'block';
+            }
+        
+            // Smooth fade in
             setTimeout(() => p.style.opacity = '1', 50);
         }
 
