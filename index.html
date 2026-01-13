@@ -396,15 +396,19 @@
 
         async function loadChefStatus() {
             const res = await fetch(`${API_URL}/api/my-requests/${currentUser.id}`);
-            const data = await res.json();
-            document.getElementById('chef-status-body').innerHTML = data.map(r => `
-                <tr class="border-b">
-                    <td class="p-4 text-xs font-mono text-gray-500">${new Date(r.created_at).toLocaleDateString()}</td>
-                    <td class="p-4 text-center font-bold">${r.total_items} items</td>
-                    <td class="p-4 text-center"><span class="px-2 py-1 rounded text-xs font-bold uppercase ${r.status==='validated'?'bg-green-100 text-green-700':'bg-yellow-100 text-yellow-700'}">${r.status}</span></td>
-                    <td class="p-4 text-right"><button onclick="viewAndPrint(${r.id})" class="text-blue-600 font-bold hover:underline text-xs">Imprimer</button></td>
-                </tr>
-            `).join('');
+                const data = await res.json();
+                document.getElementById('chef-status-body').innerHTML = data.map(r => `
+                    <tr class="border-b">
+                        <td class="p-4 text-xs font-mono text-gray-500">${new Date(r.created_at).toLocaleDateString()}</td>
+                        <td class="p-4 text-center font-bold">${r.total_items}</td>
+                        <td class="p-4 text-center">
+                            <span class="px-2 py-1 rounded text-xs font-bold uppercase ${r.status==='validated'?'bg-green-100 text-green-700':'bg-yellow-100 text-yellow-700'}">
+                                ${r.status === 'validated' ? LANG[currentLang].stat_val : LANG[currentLang].stat_pending}
+                            </span>
+                        </td>
+                        <td class="p-4 text-right"><button onclick="viewAndPrint(${r.id})" class="text-blue-600 font-bold hover:underline text-xs">Imprimer</button></td>
+                    </tr>
+                `).join('');
         }
 
         // --- ADMIN LOGIC ---
@@ -489,15 +493,25 @@
 
         // Products Logic
         async function loadAdminProducts() {
-            const res = await fetch(`${API_URL}/api/products`);
+            // Note: Admin uses the /products-all endpoint
+            const res = await fetch(`${API_URL}/api/admin/products-all`);
             const prods = await res.json();
             document.getElementById('products-table-body').innerHTML = prods.map(p => `
-                <tr class="border-b hover:bg-slate-50">
-                    <td class="p-2 text-sm font-bold text-gray-700">${p.name_fr}</td>
+                <tr class="border-b hover:bg-slate-50 ${p.is_hidden ? 'bg-gray-100 opacity-60' : ''}">
+                    <td class="p-2 text-sm font-bold text-gray-700">${p.name_fr} ${p.is_hidden ? '(Caché)' : ''}</td>
                     <td class="p-2 text-xs text-gray-500 uppercase">${p.category}</td>
-                    <td class="p-2 text-right"><button onclick="deleteProduct(${p.id})" class="text-red-500 text-xs font-bold hover:underline">Delete</button></td>
+                    <td class="p-2 text-right flex justify-end gap-2">
+                        <button onclick="toggleVisibility(${p.id})" class="px-2 py-1 rounded text-[10px] font-bold text-white ${p.is_hidden ? 'bg-green-500' : 'bg-orange-400'}">
+                            ${p.is_hidden ? 'UNHIDE' : 'HIDE'}
+                        </button>
+                        <button onclick="deleteProduct(${p.id})" class="text-red-500 text-xs font-bold hover:underline">Delete</button>
+                    </td>
                 </tr>
             `).join('');
+        }
+        async function toggleVisibility(id) {
+            await fetch(`${API_URL}/api/admin/product/toggle/${id}`, { method: 'POST' });
+            loadAdminProducts();
         }
         
         document.getElementById('admin-add-product').addEventListener('submit', async(e)=>{
