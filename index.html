@@ -3,151 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BesoinTech - Gestion des Besoins</title>
+    <title>Epipharm Vigilance - Gestion des Besoins</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
     <script>
         tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Cairo', 'sans-serif'] }
-                }
-            }
+            theme: { extend: { fontFamily: { sans: ['Cairo', 'sans-serif'] }, colors: { brand: '#0891b2' } } }
         }
     </script>
     <style>
-        .rtl { direction: rtl; }
-        .ltr { direction: ltr; }
-        /* Smooth fade */
         .page { transition: opacity 0.3s ease; }
         .hidden-page { display: none; opacity: 0; }
+        .modal { background-color: rgba(0,0,0,0.5); }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans min-h-screen">
+<body class="bg-gray-50 text-slate-800 font-sans min-h-screen flex flex-col">
 
     <script>
-        // REPLACE THIS URL WITH YOUR CLOUDFLARE WORKER URL
+        // UPDATE THIS URL
         const API_URL = "https://besointech.ferhathamza17.workers.dev"; 
     </script>
 
-    <div id="login-page" class="flex items-center justify-center min-h-screen px-4">
-        <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border-t-4 border-blue-600">
-            <div class="text-center mb-6">
-                <h1 class="text-2xl font-bold text-blue-700">BesoinTech</h1>
-                <p class="text-gray-500 text-sm">Système de Recensement des Besoins</p>
-                <p class="text-gray-400 text-xs mt-1">نظام إحصاء الاحتياجات</p>
+    <div id="login-page" class="flex-grow flex items-center justify-center px-4 bg-gradient-to-br from-slate-100 to-blue-50">
+        <div class="bg-white p-10 rounded-2xl shadow-xl w-full max-w-md border-t-8 border-brand">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Epipharm Vigilance</h1>
+                <p class="text-brand font-medium">Besoins EPSP Berriane</p>
             </div>
-            
-            <form id="login-form" class="space-y-4">
+            <form id="login-form" class="space-y-5">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Username / اسم المستخدم</label>
-                    <input type="text" id="username" class="w-full p-2 border rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    <label class="block text-sm font-bold text-slate-600 mb-1">Nom d'utilisateur</label>
+                    <input type="text" id="username" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand outline-none transition" required>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Password / كلمة السر</label>
-                    <input type="password" id="password" class="w-full p-2 border rounded mt-1 focus:ring-2 focus:ring-blue-500 outline-none" required>
+                    <label class="block text-sm font-bold text-slate-600 mb-1">Mot de passe</label>
+                    <input type="password" id="password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand outline-none transition" required>
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded transition">
-                    Login / دخول
+                <button type="submit" class="w-full bg-brand hover:bg-cyan-700 text-white font-bold py-3 rounded-lg shadow-lg transition transform active:scale-95">
+                    Connexion / دخول
                 </button>
-                <p id="login-error" class="text-red-500 text-center text-sm hidden">Invalid Credentials</p>
+                <p id="login-error" class="text-red-500 text-center text-sm hidden font-bold mt-2">Identifiants Incorrects</p>
             </form>
         </div>
     </div>
 
-    <div id="app-page" class="hidden-page min-h-screen flex flex-col">
-        <header class="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-50">
-            <div>
-                <h2 class="font-bold text-lg text-blue-800">BesoinTech</h2>
-                <span id="user-display" class="text-xs text-gray-500 block"></span>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="toggleLang()" class="text-sm border px-3 py-1 rounded hover:bg-gray-100">FR/AR</button>
-                <button onclick="logout()" class="text-sm bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200">Logout</button>
+    <div id="app-page" class="hidden-page flex-grow flex flex-col">
+        <header class="bg-white shadow-md p-4 sticky top-0 z-40">
+            <div class="container mx-auto flex justify-between items-center">
+                <div>
+                    <h2 class="font-bold text-xl text-brand">Epipharm Vigilance</h2>
+                    <span id="user-display" class="text-xs text-slate-500 font-mono"></span>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="toggleLang()" class="px-3 py-1 text-sm border rounded hover:bg-gray-100 font-bold">FR/AR</button>
+                    <button onclick="logout()" class="px-3 py-1 text-sm bg-red-50 text-red-600 rounded hover:bg-red-100 font-bold">Déconnexion</button>
+                </div>
             </div>
         </header>
 
-        <div class="container mx-auto p-4 max-w-4xl flex-grow">
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded">
+        <main class="container mx-auto p-4 max-w-5xl flex-grow">
+            <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-8 rounded-r shadow-sm">
                 <div class="flex">
-                    <div class="flex-shrink-0">⚠️</div>
+                    <div class="flex-shrink-0 text-amber-400">
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                    </div>
                     <div class="ml-3">
-                        <p class="text-sm text-yellow-700 font-bold" data-translate="warning_title">IMPORTANT</p>
-                        <p class="text-sm text-yellow-600" data-translate="warning_text">
-                            Do not count old or broken equipment. Only request NEW needs.
-                        </p>
+                        <p class="text-sm text-amber-700 font-bold" data-translate="warning_title">IMPORTANT</p>
+                        <p class="text-sm text-amber-600 mt-1" data-translate="warning_text">Ne demandez que les NOUVEAUX besoins.</p>
                     </div>
                 </div>
             </div>
 
             <form id="needs-form">
-                <div id="products-list" class="space-y-6">
-                    </div>
+                <div id="products-list" class="grid grid-cols-1 gap-6"></div>
 
-                <div class="mt-8 bg-white p-6 rounded-lg shadow border border-gray-200">
-                    <h3 class="font-bold text-lg mb-4" data-translate="other_title">Autre / أخرى</h3>
+                <div class="mt-8 bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <h3 class="font-bold text-lg text-slate-700 mb-4 border-b pb-2" data-translate="other_title">Autre / أخرى</h3>
                     <div id="custom-items-container" class="space-y-3"></div>
-                    <button type="button" onclick="addCustomItem()" class="mt-3 text-sm text-blue-600 hover:underline flex items-center gap-1">
-                        + <span data-translate="add_other">Ajouter un autre article</span>
+                    <button type="button" onclick="addCustomItem()" class="mt-4 text-sm bg-blue-50 text-blue-600 px-4 py-2 rounded hover:bg-blue-100 transition flex items-center gap-2 font-bold">
+                        <span>+</span> <span data-translate="add_other">Ajouter un autre article</span>
                     </button>
                 </div>
 
-                <div class="sticky bottom-4 mt-8">
-                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white text-lg font-bold py-3 rounded shadow-lg transform transition hover:scale-[1.01]">
-                        <span data-translate="submit_btn">Envoyer la demande / إرسال الطلب</span>
+                <div class="sticky bottom-4 mt-8 z-30">
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white text-lg font-bold py-4 rounded-xl shadow-xl transform transition hover:scale-[1.01] flex justify-center items-center gap-2">
+                        <span data-translate="submit_btn">Envoyer la demande</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </button>
                 </div>
             </form>
+        </main>
+    </div>
+
+    <div id="admin-page" class="hidden-page min-h-screen bg-slate-100">
+        <header class="bg-slate-800 text-white shadow-lg sticky top-0 z-50">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <h2 class="font-bold text-xl">Admin Dashboard</h2>
+                    <nav class="hidden md:flex gap-1 bg-slate-700 rounded p-1">
+                        <button onclick="switchAdminTab('requests')" id="tab-btn-requests" class="px-3 py-1 rounded text-sm font-medium transition bg-slate-600 text-white">Requests</button>
+                        <button onclick="switchAdminTab('users')" id="tab-btn-users" class="px-3 py-1 rounded text-sm font-medium transition hover:bg-slate-600 text-gray-300">Users</button>
+                        <button onclick="switchAdminTab('products')" id="tab-btn-products" class="px-3 py-1 rounded text-sm font-medium transition hover:bg-slate-600 text-gray-300">Products</button>
+                    </nav>
+                </div>
+                <button onclick="logout()" class="text-xs bg-red-600 hover:bg-red-700 px-3 py-1.5 rounded font-bold uppercase tracking-wider">Logout</button>
+            </div>
+            <div class="md:hidden flex justify-around p-2 bg-slate-900 text-xs">
+                <button onclick="switchAdminTab('requests')">REQUESTS</button>
+                <button onclick="switchAdminTab('users')">USERS</button>
+                <button onclick="switchAdminTab('products')">PRODUCTS</button>
+            </div>
+        </header>
+
+        <div class="container mx-auto p-4 md:p-6 max-w-6xl">
+            
+            <div id="admin-tab-requests" class="admin-tab">
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="p-4 border-b flex justify-between items-center bg-gray-50">
+                        <h3 class="font-bold text-slate-700">Incoming Requests</h3>
+                        <button onclick="loadAdminRequests()" class="text-blue-600 hover:underline text-sm">Refresh</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-100 text-slate-600 uppercase text-xs font-bold">
+                                <tr>
+                                    <th class="p-4">Date</th>
+                                    <th class="p-4">Service / Chef</th>
+                                    <th class="p-4 text-center">Items</th>
+                                    <th class="p-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="requests-table-body" class="divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="admin-tab-users" class="admin-tab hidden">
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2 bg-white rounded-lg shadow overflow-hidden">
+                        <h3 class="p-4 font-bold border-b bg-gray-50">Existing Users</h3>
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-100"><tr><th class="p-2 text-left">Username</th><th class="p-2 text-left">Service</th><th class="p-2">Action</th></tr></thead>
+                            <tbody id="users-table-body"></tbody>
+                        </table>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6 h-fit">
+                        <h3 class="font-bold text-lg mb-4 text-brand">Add New User</h3>
+                        <form id="admin-add-user" class="space-y-3">
+                            <input type="text" name="username" placeholder="Username" class="w-full border p-2 rounded" required>
+                            <input type="password" name="password" placeholder="Password" class="w-full border p-2 rounded" required>
+                            <input type="text" name="full_name" placeholder="Full Name (Chef)" class="w-full border p-2 rounded" required>
+                            <input type="text" name="service_name" placeholder="Service Name" class="w-full border p-2 rounded" required>
+                            <select name="role" class="w-full border p-2 rounded">
+                                <option value="chef">Chef de Service</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                            <button type="submit" class="w-full bg-slate-800 text-white py-2 rounded hover:bg-slate-700 font-bold">Create User</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div id="admin-tab-products" class="admin-tab hidden">
+                <div class="max-w-md mx-auto bg-white rounded-lg shadow p-6">
+                    <h3 class="font-bold text-lg mb-4 text-brand">Add System Product</h3>
+                    <form id="admin-add-product" class="space-y-3">
+                        <input type="text" name="name_fr" placeholder="Name (FR)" class="w-full border p-2 rounded" required>
+                        <input type="text" name="name_ar" placeholder="Name (AR)" class="w-full border p-2 rounded text-right" required>
+                        <select name="category" class="w-full border p-2 rounded">
+                            <option value="Informatique">Matériel Info</option>
+                            <option value="Bureautique">Bureautique</option>
+                            <option value="Mobilier">Mobilier</option>
+                        </select>
+                        <label class="flex items-center space-x-2 text-sm text-gray-600 bg-gray-50 p-2 rounded border cursor-pointer">
+                            <input type="checkbox" name="requires_detail">
+                            <span>Requires Room/Location allocation?</span>
+                        </label>
+                        <button type="submit" class="w-full bg-slate-800 text-white py-2 rounded hover:bg-slate-700 font-bold">Add Product</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div id="admin-page" class="hidden-page min-h-screen bg-gray-100">
-        <header class="bg-slate-800 text-white p-4 flex justify-between items-center shadow-lg">
-            <h2 class="font-bold text-xl">Admin Dashboard</h2>
-            <button onclick="logout()" class="text-sm bg-slate-700 px-3 py-1 rounded hover:bg-slate-600">Logout</button>
-        </header>
-
-        <div class="container mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white p-6 rounded shadow">
-                <h3 class="font-bold mb-4 border-b pb-2">Add New Product</h3>
-                <form id="admin-add-product" class="space-y-3">
-                    <input type="text" name="name_fr" placeholder="Name (FR)" class="w-full border p-2 rounded" required>
-                    <input type="text" name="name_ar" placeholder="Name (AR)" class="w-full border p-2 rounded" required>
-                    <select name="category" class="w-full border p-2 rounded">
-                        <option value="hardware">Matériel Info</option>
-                        <option value="peripheral">Périphériques</option>
-                        <option value="furniture">Mobilier</option>
-                    </select>
-                    <label class="flex items-center space-x-2 text-sm text-gray-600">
-                        <input type="checkbox" name="requires_detail">
-                        <span>Requires "Where does it go?" (Check for PC/Printers)</span>
-                    </label>
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded w-full">Add Product</button>
-                </form>
+    <div id="details-modal" class="hidden fixed inset-0 modal z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50 rounded-t-xl">
+                <div>
+                    <h3 class="font-bold text-lg" id="modal-title">Request Details</h3>
+                    <p class="text-xs text-gray-500" id="modal-subtitle">...</p>
+                </div>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
             </div>
-
-            <div class="bg-white p-6 rounded shadow flex flex-col justify-center items-center">
-                <h3 class="text-gray-500 text-sm uppercase">Total Requests</h3>
-                <p id="total-requests-count" class="text-5xl font-bold text-blue-600 my-2">0</p>
-                <p class="text-gray-400 text-xs">Updated just now</p>
-            </div>
-        </div>
-
-        <div class="container mx-auto p-6">
-            <div class="bg-white rounded shadow overflow-hidden">
-                <h3 class="p-4 font-bold bg-gray-50 border-b">Recent Requests</h3>
-                <table class="w-full text-left text-sm">
+            <div class="p-6 overflow-y-auto flex-grow">
+                <table class="w-full text-sm border-collapse border border-gray-200" id="print-content">
                     <thead class="bg-gray-100">
                         <tr>
-                            <th class="p-3">ID</th>
-                            <th class="p-3">Chef / Service</th>
-                            <th class="p-3">Items</th>
-                            <th class="p-3">Date</th>
+                            <th class="border p-2 text-left">Product</th>
+                            <th class="border p-2 w-16 text-center">Qty</th>
+                            <th class="border p-2">Notes / Allocations</th>
                         </tr>
                     </thead>
-                    <tbody id="requests-table-body">
-                        </tbody>
+                    <tbody id="modal-items-body"></tbody>
                 </table>
+            </div>
+            <div class="p-4 border-t bg-gray-50 rounded-b-xl flex justify-end gap-3">
+                <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded">Close</button>
+                <button onclick="printCurrentRequest()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    Print PDF
+                </button>
             </div>
         </div>
     </div>
@@ -161,9 +230,9 @@
                 other_title: "Autre / Divers",
                 add_other: "Ajouter un autre article",
                 submit_btn: "Envoyer la demande",
-                lbl_qty: "Quantité",
+                lbl_qty: "Qté",
                 lbl_note: "Remarque",
-                lbl_alloc: "Emplacement pour l'unité"
+                lbl_alloc: "Emplacement/Bureau (ex: Bureau Chef)"
             },
             ar: {
                 warning_title: "تنبيه هام",
@@ -173,24 +242,23 @@
                 submit_btn: "إرسال الطلب",
                 lbl_qty: "الكمية",
                 lbl_note: "ملاحظة",
-                lbl_alloc: "مكان التعيين للوحدة"
+                lbl_alloc: "مكان التعيين (مثال: مكتب المدير)"
             }
         };
         let currentLang = 'fr';
 
-        // --- AUTH LOGIC ---
-        const loginForm = document.getElementById('login-form');
-        
-        loginForm.addEventListener('submit', async (e) => {
+        // --- AUTH ---
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
-            
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = "Checking...";
+            btn.disabled = true;
+
             try {
-                const res = await fetch(`${API_URL}/api/login`, {
-                    method: 'POST',
-                    body: JSON.stringify({ username: u, password: p })
-                });
+                const u = document.getElementById('username').value;
+                const p = document.getElementById('password').value;
+                const res = await fetch(`${API_URL}/api/login`, { method: 'POST', body: JSON.stringify({ username: u, password: p }) });
                 
                 if (res.ok) {
                     const user = await res.json();
@@ -199,168 +267,127 @@
                 } else {
                     document.getElementById('login-error').classList.remove('hidden');
                 }
-            } catch (err) {
-                alert("Connection Error");
-            }
+            } catch (err) { alert("Connection Error"); }
+            finally { btn.innerText = originalText; btn.disabled = false; }
         });
 
         function checkAuth() {
             const userStr = localStorage.getItem('user');
-            if (!userStr) {
-                showPage('login-page');
-                return;
-            }
-            const user = JSON.parse(userStr);
+            if (!userStr) return showPage('login-page');
             
+            const user = JSON.parse(userStr);
             if (user.role === 'admin') {
                 showPage('admin-page');
-                loadAdminData();
+                switchAdminTab('requests'); // Load default
             } else {
                 showPage('app-page');
                 document.getElementById('user-display').innerText = `${user.full_name} (${user.service_name})`;
                 loadProducts();
             }
         }
-
-        function logout() {
-            localStorage.removeItem('user');
-            location.reload();
-        }
-
+        function logout() { localStorage.removeItem('user'); location.reload(); }
         function showPage(id) {
-            ['login-page', 'app-page', 'admin-page'].forEach(pid => {
-                document.getElementById(pid).classList.add('hidden-page');
-            });
+            document.querySelectorAll('.hidden-page, #login-page').forEach(el => { el.style.display = 'none'; el.style.opacity = '0'; });
             const p = document.getElementById(id);
-            p.style.display = 'block';
-            setTimeout(() => p.style.opacity = '1', 10);
+            p.style.display = (id === 'app-page' ? 'flex' : 'block');
+            setTimeout(() => p.style.opacity = '1', 50);
         }
 
-        // --- APP LOGIC (User Form) ---
+        // --- USER APP LOGIC ---
         let allProducts = [];
-
         async function loadProducts() {
             const res = await fetch(`${API_URL}/api/products`);
             allProducts = await res.json();
-            renderProducts();
-        }
-
-        function renderProducts() {
             const container = document.getElementById('products-list');
             container.innerHTML = '';
             
-            // Group by category if you want, simpler list for now
             allProducts.forEach(p => {
                 const name = currentLang === 'ar' ? p.name_ar : p.name_fr;
                 const dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-                
-                const html = `
-                <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 transition hover:shadow-md" dir="${dir}">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div class="flex-1">
-                            <h3 class="font-bold text-lg text-gray-800">${name}</h3>
-                            <span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">${p.category}</span>
+                container.innerHTML += `
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-200 transition hover:shadow-md" dir="${dir}">
+                    <div class="flex justify-between items-center gap-4">
+                        <div>
+                            <h3 class="font-bold text-gray-800 text-lg">${name}</h3>
+                            <span class="text-xs uppercase tracking-wide text-gray-400 font-bold">${p.category}</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <label class="text-sm font-semibold text-gray-600">${LANG[currentLang].lbl_qty}:</label>
-                            <input type="number" min="0" 
-                                   class="w-20 border-2 border-gray-300 rounded p-2 text-center focus:border-blue-500 outline-none qty-input"
-                                   onchange="handleQtyChange(this, ${p.id}, ${p.requires_detail})">
+                        <div class="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border">
+                            <span class="text-xs font-bold text-gray-500">${LANG[currentLang].lbl_qty}</span>
+                            <input type="number" min="0" class="w-16 bg-white border border-gray-300 rounded text-center font-bold text-lg p-1 outline-none focus:border-blue-500"
+                                   onchange="handleQty(this, ${p.id}, ${p.requires_detail})">
                         </div>
                     </div>
-                    
-                    <input type="text" id="note-${p.id}" placeholder="${LANG[currentLang].lbl_note}..." class="mt-3 w-full border-b border-gray-300 text-sm py-1 focus:border-blue-500 outline-none">
-
-                    <div id="alloc-${p.id}" class="mt-4 space-y-2 hidden bg-blue-50 p-3 rounded border border-blue-100">
-                        <p class="text-xs text-blue-600 font-bold mb-2">⚠ Specify location for each unit:</p>
-                        <div class="alloc-inputs-container"></div>
+                    <div id="extra-${p.id}" class="hidden mt-4 pt-4 border-t border-dashed">
+                        <input type="text" id="note-${p.id}" placeholder="${LANG[currentLang].lbl_note}..." class="w-full text-sm p-2 border rounded bg-gray-50 mb-2">
+                        <div id="alloc-container-${p.id}" class="space-y-2"></div>
                     </div>
-                </div>
-                `;
-                container.innerHTML += html;
+                </div>`;
             });
-            updateStaticText();
+            updateTexts();
         }
 
-        window.handleQtyChange = function(input, pid, needsDetail) {
+        window.handleQty = function(input, pid, details) {
             const qty = parseInt(input.value) || 0;
-            const container = document.getElementById(`alloc-${pid}`);
-            const inputsDiv = container.querySelector('.alloc-inputs-container');
+            const extra = document.getElementById(`extra-${pid}`);
+            const allocs = document.getElementById(`alloc-container-${pid}`);
             
-            if (!needsDetail) return;
-
             if (qty > 0) {
-                container.classList.remove('hidden');
-                // Rebuild inputs but try to keep values if reducing
-                let html = '';
-                for(let i=1; i<=qty; i++) {
-                    html += `<div class="flex items-center gap-2">
-                        <span class="text-xs font-bold text-gray-500">#${i}</span>
-                        <input type="text" name="p_${pid}_u_${i}" 
-                               placeholder="${LANG[currentLang].lbl_alloc}" 
-                               class="w-full bg-white border border-gray-300 rounded text-sm px-2 py-1">
-                    </div>`;
+                extra.classList.remove('hidden');
+                input.parentElement.classList.add('border-blue-500', 'bg-blue-50');
+                if(details) {
+                    let html = `<p class="text-xs font-bold text-blue-600 mb-1">Précisez l'emplacement :</p>`;
+                    for(let i=1; i<=qty; i++) {
+                        html += `<div class="flex items-center gap-2"><span class="text-xs font-mono text-gray-400">#${i}</span><input type="text" name="p_${pid}_u_${i}" placeholder="${LANG[currentLang].lbl_alloc}" class="flex-1 text-sm border rounded p-1.5 focus:border-blue-500 outline-none"></div>`;
+                    }
+                    allocs.innerHTML = html;
                 }
-                inputsDiv.innerHTML = html;
             } else {
-                container.classList.add('hidden');
-                inputsDiv.innerHTML = '';
+                extra.classList.add('hidden');
+                allocs.innerHTML = '';
+                input.parentElement.classList.remove('border-blue-500', 'bg-blue-50');
             }
         }
 
         window.addCustomItem = function() {
-            const container = document.getElementById('custom-items-container');
             const div = document.createElement('div');
-            div.className = "flex gap-2 items-center";
+            div.className = "flex gap-2 items-start animate-fade-in";
             div.innerHTML = `
-                <input type="text" placeholder="Item Name" class="flex-1 border p-2 rounded custom-name">
-                <input type="number" placeholder="Qty" class="w-20 border p-2 rounded custom-qty">
-                <button type="button" onclick="this.parentElement.remove()" class="text-red-500 font-bold px-2">X</button>
+                <input type="text" placeholder="Article Name" class="flex-1 border p-2 rounded custom-name focus:ring-2 focus:ring-blue-500 outline-none">
+                <input type="number" placeholder="1" class="w-20 border p-2 rounded custom-qty text-center font-bold">
+                <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-600 font-bold px-2 py-2">&times;</button>
             `;
-            container.appendChild(div);
+            document.getElementById('custom-items-container').appendChild(div);
         }
 
-        // Form Submit
         document.getElementById('needs-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            if(!confirm("Êtes-vous sûr de vouloir envoyer cette demande ?")) return;
+
             const user = JSON.parse(localStorage.getItem('user'));
-            
-            // Collect Data
             const items = [];
-            
-            // 1. Standard Products
+
+            // Standard Items
             allProducts.forEach(p => {
-                const qtyInput = document.querySelector(`input[onchange*="${p.id},"]`); // finding by logic hook
+                const qtyInput = document.querySelector(`input[onchange*="${p.id},"]`);
                 const qty = parseInt(qtyInput?.value) || 0;
-                
                 if (qty > 0) {
                     const note = document.getElementById(`note-${p.id}`).value;
-                    const allocations = [];
-                    
+                    const allocs = [];
                     if (p.requires_detail) {
-                        const allocInputs = document.querySelectorAll(`input[name^="p_${p.id}_u_"]`);
-                        allocInputs.forEach(inp => allocations.push(inp.value));
+                        document.querySelectorAll(`input[name^="p_${p.id}_u_"]`).forEach(i => allocs.push(i.value));
                     }
-                    
-                    items.push({
-                        name: p.name_fr, // Store French name as key
-                        quantity: qty,
-                        notes: note,
-                        allocations: allocations
-                    });
+                    items.push({ name: p.name_fr, quantity: qty, notes: note, allocations: allocs });
                 }
             });
 
-            // 2. Custom Items
+            // Custom Items
             document.querySelectorAll('#custom-items-container > div').forEach(div => {
                 const name = div.querySelector('.custom-name').value;
                 const qty = div.querySelector('.custom-qty').value;
-                if(name && qty) {
-                    items.push({ name: name + " (Autre)", quantity: parseInt(qty), allocations: [], notes: "Custom Item" });
-                }
+                if(name && qty) items.push({ name: name + " (Autre)", quantity: parseInt(qty), allocations: [], notes: "Article ajouté manuellement" });
             });
 
-            if(items.length === 0) return alert("Please select at least one item.");
+            if(items.length === 0) return alert("Veuillez sélectionner au moins un article.");
 
             const res = await fetch(`${API_URL}/api/submit`, {
                 method: 'POST',
@@ -368,60 +395,206 @@
             });
 
             if(res.ok) {
-                alert("Request Submitted Successfully!");
+                alert("Demande envoyée avec succès !");
                 location.reload();
             }
         });
 
         // --- ADMIN LOGIC ---
-        async function loadAdminData() {
-            const res = await fetch(`${API_URL}/api/admin/data`);
+        window.switchAdminTab = function(tab) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.add('hidden'));
+            document.getElementById(`admin-tab-${tab}`).classList.remove('hidden');
+            
+            // Highlight button
+            document.querySelectorAll('nav button').forEach(b => {
+                 b.classList.remove('bg-slate-600', 'text-white');
+                 b.classList.add('text-gray-300');
+            });
+            document.getElementById(`tab-btn-${tab}`)?.classList.add('bg-slate-600', 'text-white');
+
+            if(tab === 'requests') loadAdminRequests();
+            if(tab === 'users') loadAdminUsers();
+        }
+
+        async function loadAdminRequests() {
+            const res = await fetch(`${API_URL}/api/admin/requests`);
             const data = await res.json();
-            
-            document.getElementById('total-requests-count').innerText = data.requests.length;
-            
-            const tbody = document.getElementById('requests-table-body');
-            tbody.innerHTML = data.requests.map(r => `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="p-3 font-mono text-xs text-gray-500">#${r.id}</td>
-                    <td class="p-3">
-                        <div class="font-bold text-gray-800">${r.full_name}</div>
-                        <div class="text-xs text-gray-500">${r.service_name}</div>
+            document.getElementById('requests-table-body').innerHTML = data.map(r => `
+                <tr class="border-b hover:bg-slate-50 transition">
+                    <td class="p-4 text-xs text-gray-500 font-mono">${new Date(r.created_at).toLocaleDateString()}</td>
+                    <td class="p-4">
+                        <div class="font-bold text-slate-800 text-sm">${r.full_name}</div>
+                        <div class="text-xs text-brand font-bold uppercase tracking-wider">${r.service_name}</div>
                     </td>
-                    <td class="p-3 text-blue-600 font-bold">${r.total_items} items</td>
-                    <td class="p-3 text-xs text-gray-500">${new Date(r.created_at).toLocaleDateString()}</td>
+                    <td class="p-4 text-center font-bold text-gray-700 bg-gray-50 rounded mx-2">${r.total_items}</td>
+                    <td class="p-4 text-right">
+                        <button onclick="viewRequest(${r.id})" class="bg-white border border-slate-300 text-slate-600 hover:bg-slate-50 hover:text-blue-600 px-3 py-1 rounded text-sm font-bold shadow-sm">
+                            View & Print
+                        </button>
+                    </td>
                 </tr>
             `).join('');
         }
-        
+
+        async function loadAdminUsers() {
+            const res = await fetch(`${API_URL}/api/admin/users`);
+            const users = await res.json();
+            document.getElementById('users-table-body').innerHTML = users.map(u => `
+                <tr class="border-b">
+                    <td class="p-2 font-mono text-xs">${u.username}</td>
+                    <td class="p-2 text-sm">${u.full_name}<br><span class="text-xs text-gray-500">${u.service_name}</span></td>
+                    <td class="p-2"><button onclick="deleteUser(${u.id})" class="text-red-500 hover:text-red-700 text-xs font-bold">DEL</button></td>
+                </tr>
+            `).join('');
+        }
+
+        // Add User
+        document.getElementById('admin-add-user').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(e.target));
+            const res = await fetch(`${API_URL}/api/admin/users`, { method: 'POST', body: JSON.stringify(data) });
+            if(res.ok) { e.target.reset(); loadAdminUsers(); alert('User Added'); }
+            else alert('Error adding user');
+        });
+
+        // Delete User
+        window.deleteUser = async function(id) {
+            if(confirm('Delete user?')) {
+                await fetch(`${API_URL}/api/admin/users/${id}`, { method: 'DELETE' });
+                loadAdminUsers();
+            }
+        }
+
+        // Add Product
         document.getElementById('admin-add-product').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData.entries());
-            data.requires_detail = formData.get('requires_detail') === 'on';
-            
+            const fd = new FormData(e.target);
+            const data = Object.fromEntries(fd.entries());
+            data.requires_detail = fd.get('requires_detail') === 'on';
             await fetch(`${API_URL}/api/admin/product`, { method: 'POST', body: JSON.stringify(data) });
-            alert("Product Added");
-            e.target.reset();
+            e.target.reset(); alert('Product Added');
         });
+
+        // --- DETAILS & PRINTING ---
+        let currentRequestData = null;
+
+        window.viewRequest = async function(id) {
+            const res = await fetch(`${API_URL}/api/admin/request/${id}`);
+            const data = await res.json();
+            currentRequestData = data;
+
+            document.getElementById('modal-title').innerText = `Request #${data.info.id}`;
+            document.getElementById('modal-subtitle').innerText = `${data.info.full_name} - ${data.info.service_name}`;
+            
+            document.getElementById('modal-items-body').innerHTML = data.items.map(item => {
+                let allocs = '';
+                try {
+                    const parsed = JSON.parse(item.allocations);
+                    if(parsed.length) allocs = `<ul class="list-disc list-inside text-xs text-blue-600 mt-1 bg-blue-50 p-1 rounded">${parsed.map(a => `<li>${a}</li>`).join('')}</ul>`;
+                } catch(e) {}
+                
+                return `
+                <tr class="border-b">
+                    <td class="p-2 font-medium">${item.product_name}</td>
+                    <td class="p-2 text-center font-bold">${item.quantity}</td>
+                    <td class="p-2 text-sm text-gray-600 italic">
+                        ${item.notes || ''}
+                        ${allocs}
+                    </td>
+                </tr>`;
+            }).join('');
+
+            document.getElementById('details-modal').classList.remove('hidden');
+        }
+
+        window.closeModal = function() { document.getElementById('details-modal').classList.add('hidden'); }
+
+        window.printCurrentRequest = function() {
+            if(!currentRequestData) return;
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const data = currentRequestData;
+
+            // --- HEADER ---
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "bold");
+            doc.text("République Algérienne Démocratique Et Populaire", 105, 15, { align: "center" });
+            doc.text("Ministère de la Santé", 105, 20, { align: "center" });
+            
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "normal");
+            // Left aligned block
+            let yLeft = 35;
+            doc.text("Direction de la Santé et de la Population de la Wilaya de Ghardaïa", 15, yLeft);
+            doc.text("Etablissement Public de santé de proximité - Berriane", 15, yLeft + 5);
+            doc.setFont("helvetica", "bold");
+            doc.text("Bureau des Systèmes d'Information et Informatique", 15, yLeft + 10);
+
+            // Title
+            doc.setFontSize(14);
+            doc.text("FICHE DE BESOINS", 105, 55, { align: "center" });
+            
+            // Info Box
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Service: ${data.info.service_name}`, 15, 65);
+            doc.text(`Chef de Service: ${data.info.full_name}`, 15, 70);
+            doc.text(`Date de demande: ${new Date(data.info.created_at).toLocaleDateString()}`, 15, 75);
+
+            // --- TABLE ---
+            const tableBody = data.items.map(item => {
+                let note = item.notes || "";
+                try {
+                    const allocs = JSON.parse(item.allocations);
+                    if(allocs.length > 0) {
+                        note += "\nEmplacements: " + allocs.join(", ");
+                    }
+                } catch(e) {}
+                return [item.product_name, item.quantity, note];
+            });
+
+            doc.autoTable({
+                startY: 85,
+                head: [['Désignation', 'Quantité', 'Observations / Affectations']],
+                body: tableBody,
+                theme: 'grid',
+                headStyles: { fillColor: [41, 128, 185] }, // Blue header
+                styles: { fontSize: 10, cellPadding: 2 },
+                columnStyles: {
+                    0: { cellWidth: 90 },
+                    1: { cellWidth: 20, halign: 'center' },
+                    2: { cellWidth: 'auto' }
+                }
+            });
+
+            // --- FOOTER ---
+            const finalY = doc.lastAutoTable.finalY + 20;
+            const today = new Date().toLocaleDateString();
+            
+            doc.text(`Fait à Berriane, le: ${today}`, 140, finalY);
+
+            doc.setFont("helvetica", "bold");
+            doc.text("Signature du chef du service", 20, finalY + 15);
+            doc.text("Signature du chef du Bureau SII", 120, finalY + 15);
+
+            // Open PDF
+            window.open(doc.output('bloburl'), '_blank');
+        }
 
         // --- UTILS ---
         function toggleLang() {
             currentLang = currentLang === 'fr' ? 'ar' : 'fr';
             document.documentElement.lang = currentLang;
             document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-            renderProducts();
+            updateTexts();
+            loadProducts(); // Re-render for name change
         }
-
-        function updateStaticText() {
+        function updateTexts() {
             document.querySelectorAll('[data-translate]').forEach(el => {
-                const key = el.getAttribute('data-translate');
-                if(LANG[currentLang][key]) el.innerText = LANG[currentLang][key];
+                const k = el.getAttribute('data-translate');
+                if(LANG[currentLang][k]) el.innerText = LANG[currentLang][k];
             });
         }
-
-        // Init
-        checkAuth();
     </script>
 </body>
 </html>
