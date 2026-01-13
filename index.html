@@ -236,8 +236,26 @@
     <script>
         // --- TRANSLATIONS & STATE ---
         const LANG = {
-            fr: { warning_text: "Important: Ne demandez que les nouveaux besoins.", other_title: "Autre / Divers", add_other: "Ajouter un autre article", submit_btn: "Envoyer la demande", lbl_qty: "Qté" },
-            ar: { warning_text: "تنبيه: اطلب فقط الاحتياجات الجديدة.", other_title: "أخرى", add_other: "إضافة عنصر آخر", submit_btn: "إرسال الطلب", lbl_qty: "الكمية" }
+            fr: { 
+                warning_text: "Important: Ne demandez que les nouveaux besoins.", 
+                other_title: "Autre / Divers", 
+                add_other: "Ajouter un autre article", 
+                submit_btn: "Envoyer la demande", 
+                lbl_qty: "Qté",
+                tab_status: "Mes Demandes & Status",
+                th_date: "Date", th_items: "Articles", th_status: "Status", th_action: "Action",
+                stat_pending: "En attente", stat_val: "Validé"
+           },
+            ar: { 
+                warning_text: "تنبيه: اطلب فقط الاحتياجات الجديدة.", 
+                other_title: "أخرى", 
+                add_other: "إضافة عنصر آخر", 
+                submit_btn: "إرسال الطلب", 
+                lbl_qty: "الكمية",
+                tab_status: "طلباتي وحالتها",
+                th_date: "التاريخ", th_items: "المواد", th_status: "الحالة", th_action: "إجراء",
+                stat_pending: "قيد الانتظار", stat_val: "تمت الموافقة"
+            }
         };
         let currentLang = 'fr';
         let currentRequestData = null; // For printing
@@ -594,7 +612,20 @@
         }
 
         // Utils
-        function toggleLang() { currentLang = currentLang==='fr'?'ar':'fr'; updateTexts(); loadProducts(); }
+        function toggleLang() { 
+            currentLang = currentLang === 'fr' ? 'ar' : 'fr'; 
+            const body = document.body;
+            if (currentLang === 'ar') {
+                body.dir = "rtl";
+                body.classList.add('text-right');
+            } else {
+                body.dir = "ltr";
+                body.classList.remove('text-right');
+            }
+            updateTexts(); 
+            loadProducts(); 
+            if(!document.getElementById('chef-tab-status').classList.contains('hidden')) loadChefStatus(); 
+        }
         function updateTexts() { document.querySelectorAll('[data-translate]').forEach(el => { const k=el.getAttribute('data-translate'); if(LANG[currentLang][k]) el.innerText = LANG[currentLang][k]; }); }
         
         checkAuth();
