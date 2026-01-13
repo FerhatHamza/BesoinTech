@@ -343,36 +343,39 @@
             const products = await res.json();
             const container = document.getElementById('products-list');
             
-            // Set container to full width just in case
-            container.classList.add('w-full');
+            // Clear and ensure grid classes are active
+            container.className = "grid grid-cols-1 md:grid-cols-3 gap-6 w-full";
         
             container.innerHTML = products.map(p => `
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition flex flex-col justify-between h-full">
-                    <div>
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition flex flex-col h-full">
+                    <div class="flex-grow">
                         <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-bold text-gray-800 text-lg leading-tight">
+                            <h3 class="font-bold text-gray-800 text-base leading-tight">
                                 ${currentLang === 'ar' ? p.name_ar : p.name_fr}
                             </h3>
                         </div>
-                        <span class="text-xs uppercase text-brand font-bold tracking-widest bg-cyan-50 px-2 py-1 rounded">
+                        <span class="text-[10px] uppercase text-brand font-bold tracking-widest bg-cyan-50 px-2 py-1 rounded">
                             ${p.category}
                         </span>
                     </div>
-                    <div class="mt-6">
-                        <div class="flex items-center gap-4">
-                            <span class="text-sm font-bold text-gray-500" data-translate="lbl_qty">Qté:</span>
+                    
+                    <div class="mt-4 pt-4 border-t border-gray-50">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-bold text-gray-400 uppercase" data-translate="lbl_qty">Qté</span>
                             <input type="number" min="0" placeholder="0" 
                                    class="w-full border-2 border-gray-100 rounded-lg text-center font-bold text-xl p-2 outline-none focus:border-brand focus:bg-blue-50 transition"
                                    onchange="handleQty(this, ${p.id}, ${p.requires_detail})">
                         </div>
-                        <div id="extra-${p.id}" class="hidden mt-4 pt-4 border-t border-dashed space-y-3">
-                            <input type="text" id="note-${p.id}" placeholder="Note / ملاحظة..." 
-                                   class="w-full text-sm p-2 border rounded-md bg-gray-50 focus:ring-1 focus:ring-brand outline-none">
-                            <div id="alloc-${p.id}" class="grid grid-cols-1 gap-2"></div>
+                        
+                        <div id="extra-${p.id}" class="hidden mt-3 space-y-2">
+                            <input type="text" id="note-${p.id}" placeholder="Note..." 
+                                   class="w-full text-xs p-2 border rounded bg-gray-50 outline-none focus:border-brand">
+                            <div id="alloc-${p.id}" class="space-y-1"></div>
                         </div>
                     </div>
                 </div>
             `).join('');
+            
             updateTexts();
         }
 
